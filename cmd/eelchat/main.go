@@ -1,49 +1,36 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
-	"os"
 
-	"github.com/apachejuice/eelchat/internal/api/rest"
-	"github.com/apachejuice/eelchat/internal/api/spec"
-	"github.com/apachejuice/eelchat/internal/config"
-	"github.com/apachejuice/eelchat/internal/db/model"
-	"github.com/apachejuice/eelchat/internal/db/repository"
-	"github.com/spf13/viper"
+	"github.com/apachejuice/eelchat/client/api"
 )
 
-func clearLogFile() {
-	if err := os.Remove(viper.GetString("logging.file")); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func loadInitialConfig() {
-	viper.AddConfigPath(".")
-	viper.AddConfigPath("/etc/eelchat")
-
-	viper.SetConfigName("eelchat")
-	err := viper.ReadInConfig()
+func main() {
+	client, err := api.NewClient("https://apachejuice.dev:5555")
 	if err != nil {
 		log.Fatal(err)
 	}
-}
 
-func main() {
-	loadInitialConfig()
-	clearLogFile()
-	config.SetupConfig()
+	resp, err := client.CreateUser(context.TODO(), api.User{
+		Username: "apachejuice",
+		Password: "this is an example password",
+	})
 
-	u := repository.NewUserRepository()
-	u.Insert(&model.User{})
-	u.Count()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	api := rest.NewAPI(
-		func(ctx rest.CreateUserContext, rctx rest.RequestContext, user spec.User) spec.CreateUserRes {
-			return ctx.InternalServerError(ctx.Error("This is not the way", "Not at all anything"))
-		},
-	)
-
-	api.ConfigureTLS()
-	api.Run()
+	switch resp := resp.(type) {
+	case *api.CreateUserNoContent:
+		fmt.Println("successfully created user")
+	case *api.CreateUserApplicationJSONBadRequest:
+		fmt.Println("bad request:", resp.Message)
+	case *api.CreateUserApplicationJSONInternalServerError:
+		fmt.Println("internal server error:", resp.Message)
+	default:
+		fmt.Println("response:", resp)
+	}
 }

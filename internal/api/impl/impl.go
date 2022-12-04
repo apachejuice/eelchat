@@ -2,6 +2,7 @@ package impl
 
 import (
 	"github.com/apachejuice/eelchat/internal/api"
+	"github.com/apachejuice/eelchat/internal/api/rest"
 	"github.com/apachejuice/eelchat/internal/db/repository"
 	"github.com/apachejuice/eelchat/internal/logs"
 )
@@ -16,4 +17,8 @@ func NewImpl() Impl {
 		userRepo: repository.NewUserRepository(),
 		log:      logs.NewLogger(api.ComponentImpl),
 	}
+}
+
+func (i Impl) Connect() *rest.API {
+	return rest.NewAPI(i.CreateUserImpl)
 }

@@ -47,7 +47,13 @@ func (a *API) logMiddleware(req middleware.Request, next middleware.Next) (middl
 			fields = append(fields, statusStr)
 
 			if status >= 500 {
-				log.Error("Failure handling request", "status", statusStr)
+				if erresp, ok := resp.Type.(interface{ GetError() spec.Error }); ok {
+					e := erresp.GetError()
+					log.Error("Failure handling request", "status", statusStr, "error", e.Message, "errorComponent", e.Component)
+				} else {
+					log.Error("Failure handling request", "status", statusStr)
+				}
+
 				return resp, err
 			}
 		}
