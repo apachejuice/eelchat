@@ -1,0 +1,11 @@
+development:
+    dialect: mysql
+    datasource: ${EELCHAT_USER}:${EELCHAT_PASSWORD}@tcp(localhost:3306)/eelchat_dev?parseTime=true
+    dir: migrations
+    table: migrations
+
+production:
+    dialect: mysql
+    datasource: ${EELCHAT_USER}:${EELCHAT_PASSWORD}@tcp(localhost:3306)/eelchat?parseTime=true
+    dir: migrations
+    table: migrations

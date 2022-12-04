@@ -1,0 +1,4 @@
+certs
+internal/api/spec/oas_*
+eelchat.json
+eelchat.log

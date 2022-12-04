@@ -1,0 +1,89 @@
+openapi: "3.0.0"
+info:
+  version: 0.0.1
+  title: Eelchat
+  license:
+    name: Apache-2.0
+paths:
+  '/users':
+    post:
+      summary: Sign up
+      description: Creates a new user to the server
+      operationId: createUser
+      requestBody:
+        required: true
+        description: The user information to create
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '204':
+          description: OK
+        '400':
+          description: Bad username or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - message
+        - component
+        - actionId
+      properties:
+        message:
+          type: string
+          description: An error message
+          nullable: false
+          readOnly: true
+        component:
+          type: string
+          description: The component at which the error happened
+          nullable: false
+          readOnly: true
+        actionId:
+          type: string
+          description: A short identifier used for debugging purposes on the server's side
+          minLength: 9
+          nullable: false
+          readOnly: true
+    User:
+      type: object
+      required: # when sending to a server
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: The username of the user
+          minLength: 3
+          maxLength: 100
+          nullable: false
+        discriminator:
+          type: string
+          description: A 4-character discrimator used to distinguish similar usernames
+          minLength: 4
+          maxLength: 4
+          readOnly: true
+          nullable: false
+        email:
+          type: string
+          description: The email address of the user (for recovery purposes)
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: The password of the user
+          nullable: false
+
